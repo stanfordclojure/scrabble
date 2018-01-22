@@ -5,18 +5,11 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :min-lein-version "2.7.1"
-  
+
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.9.229"]
                  [devcards "0.2.3"]
-                 [sablono "0.7.4"]
-                 
-                 ;; need to specify this for sablono
-                 ;; when not using devcards
-                 [cljsjs/react "15.3.1-0"]
-                 [cljsjs/react-dom "15.3.1-0"]
-                 #_[org.omcljs/om "1.0.0-alpha46"]
-                 #_[reagent "0.6.0"]
+                 [reagent "0.7.0"]
                  ]
 
   :plugins [[lein-figwheel "0.5.9"]
@@ -24,14 +17,13 @@
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled"
                                     "target"]
-  
+
   :source-paths ["src"]
 
   :cljsbuild {
               :builds [{:id "devcards"
                         :source-paths ["src"]
                         :figwheel { :devcards true  ;; <- note this
-                                    :server-port 1337
                                    ;; :open-urls will pop open your application
                                    ;; in the default browser once Figwheel has
                                    ;; started and complied your application.
@@ -57,7 +49,8 @@
                                    :output-to  "resources/public/js/compiled/scrabble.js"
                                    :optimizations :advanced}}]}
 
-  :figwheel { :css-dirs ["resources/public/css"] }
+  :figwheel { :css-dirs ["resources/public/css"]
+              :server-port 1337 }
 
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.2"]
                                   [figwheel-sidecar "0.5.9"]
