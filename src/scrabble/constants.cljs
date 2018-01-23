@@ -5,6 +5,12 @@
   (:require-macros
     [devcards.core :as dc :refer [defcard defcard-rg deftest]]))
 
+
+;; UI CONSTANTS ;;;
+(def cell-size 40)
+
+
+;; GAME CONSTANTS ;;;
 (def special-squares
   {:TW {:color "salmon" ;; "tomato"
         :positions [[0 0] [0 7] [0 14]
@@ -52,56 +58,28 @@
 
 
 (def tile-frequencies
-  {:E 12
-   :A 9
-   :I 9
-   :O 8
-   :N 6
-   :R 6
-   :T 6
-   :L 4
-   :S 4
-   :U 4
-   :D 4
-   :G 3
-   :B 2
-   :C 2
-   :M 2
-   :P 2
-   :F 2
-   :H 2
-   :V 2
-   :W 2
-   :Y 2
-   :K 1
-   :J 1
-   :X 1
-   :Q 1
-   :Z 1})
+  {:E 12 :A 9 :I 9 :O 8 :N 6 :R 6 :T 6 :L 4 :S 4 :U 4
+   :D 4 :G 3 :B 2 :C 2 :M 2 :P 2 :F 2 :H 2 :V 2 :W 2
+   :Y 2 :K 1 :J 1 :X 1 :Q 1 :Z 1 :blank 2})
 
 
 (defcard doc-tile-values
-  "
-0 Points - Blank tile.
+  "[rules](http://www.scrabblepages.com/scrabble/rules/)
 
-1 Point - A, E, I, L, N, O, R, S, T and U.
-
-2 Points - D and G.
-
-3 Points - B, C, M and P.
-
-4 Points - F, H, V, W and Y.
-
-5 Points - K.
-
-8 Points - J and X.
-
-10 Points - Q and Z.
+- 0 Points - Blank tile.
+- 1 Point - A, E, I, L, N, O, R, S, T and U.
+- 2 Points - D and G.
+- 3 Points - B, C, M and P.
+- 4 Points - F, H, V, W and Y.
+- 5 Points - K.
+- 8 Points - J and X.
+- 10 Points - Q and Z.
   ")
 
+
+;; CARDS ;;;;
 (defcard value->tiles
   value->tiles)
-
 
 (defcard tile->values
   tile->value)

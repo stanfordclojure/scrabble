@@ -1,7 +1,6 @@
-(ns scrabble.view)
+(ns scrabble.view
+  (:require [scrabble.constants :refer [cell-size]]))
 
-
-(def cell-size 40)
 
 (defn board [{:keys [rows cols]} state]
   (let [cells #(* % cell-size)
@@ -10,7 +9,7 @@
     [:svg {:width width
            :height height
            :view-box [0 0 width height]}
-     (for [{:keys [x y tile] :as cell} state]
+     (for [{:keys [x y tile] :as c} state]
        (if tile
          ^{:key [x y]}
          [:image {:x (cells x)
@@ -18,7 +17,7 @@
                   :width cell-size :height cell-size
                   :href (str "/img/" (name tile) ".png")}]
          ^{:key [x y]}
-         [:rect (-> cell
+         [:rect (-> c
                   (merge {:width cell-size
                           :height cell-size})
                   (update :x cells)
