@@ -3,11 +3,26 @@
     [devcards.core]
     [reagent.core :as reagent]
     [scrabble.constants :as const]
-    [scrabble.view :as view])
+    [scrabble.view :as view]
+    [clojure.string :as string]
+    [goog.net.XhrIo :as gxhr])
   (:require-macros
     [devcards.core :as dc :refer [defcard defcard-rg deftest]]))
 
+(declare coll->trie)
+
+(defn spy [& values]
+  (apply println values)
+  (last values))
+
+(def dictionary "https://raw.githubusercontent.com/jonbcard/scrabble-bot/master/src/dictionary.txt")
+
 (enable-console-print!)
+
+(defn- get-data [url f]
+  (gxhr/send url (fn [e]
+                   (let [xhr (-> e .-target)]
+                     (f (-> xhr (.getResponseText)))))))
 
 
 (def board
@@ -42,7 +57,12 @@
          :players [(make-player "Allan")
                    (make-player "Adi")
                    (make-player "Rich")]
-         :turn 0}))
+         :turn 0
+         :dictionary {}}))
+
+(add-watch state :game-state
+           (fn [a k old-state new-state]
+             (println new-state)))
 
 
 (defn- draw-tiles
@@ -60,6 +80,19 @@
      :player (update player :rack concat tiles-drawn)}))
 
 
+(defn- load-dictionary [state dictionary-string]
+  (let [dictionary (->> dictionary-string
+                     .toLowerCase
+                     (string/split-lines)
+                     (coll->trie)
+                     spy)]
+    (assoc state :dictionary dictionary)))
+
+
+(get-data dictionary #(swap! state load-dictionary %))
+
+
+;; STATE TRANSITION ;;;;
 (defn init-game [{:keys [bag players] :as state}]
   (let [player-cnt (count players)]
     (loop [bag bag
@@ -77,19 +110,56 @@
         state))))
 
 
+(defn- multiset-diff [s1 s2]
+  (mapcat
+    (fn [[x n]] (if (neg? n)
+                  (throw (js/Error. "not enough elements"))
+                  (repeat n x)))
+    (apply merge-with - (map frequencies [s1 s2]))))
+
+
 (defn- play-tiles
   "Places tiles, does not perform validation"
-  [board {:keys [tiles] :as player} tile->position]
-  #_(let [new-tiles ]
+  [board {:keys [tiles] :as player} position->tile]
+  (let [new-tiles (multiset-diff tiles (map val position->tile))
+        f (fn [board [position tile]]
+            (assoc-in board (concat position [:tile]) tile))
+        new-board (reduce f board position->tile)]
     {:board new-board
-     :player new-player}))
+     :player (assoc player :tiles new-tiles)}))
 
 
-(defn player-turn [{:keys [bag players turn board] :as state}]
-  )
+;; STATE TRANSITION ;;;;
+(defn player-turn [{:keys [bag players turn board] :as state} position->tile]
+  ;; game is started
+  ;; get correct player
+  ;; call play-tiles
+  ;; redraw tiles
+  ;; update bag
+  ;; update turn
+  ;; update board
+  ;; TODO update score
+  (let [player (nth players (mod turn (count players)))
+        {:keys [board player]} (play-tiles board player position->tile)
+        {:keys [bag player]} (replenish-rack bag player)]
+    {:bag bag
+     :player player
+     :turn (inc turn)
+     :board board}))
 
+
+(defn- coll->trie [coll]
+  (reduce #(assoc-in %1 %2 {:end true}) {} coll))
+
+(defn- is-prefix? [trie word]
+  (boolean (get-in trie word)))
+
+(defn- is-word? [trie word]
+  (true? (get-in trie (concat word [:end]))))
 
 (comment
+  (def tiles [:A :P :B :L :E :P])
+  (def position->tile {[4 5] :A  [5 5] :P  [6 5] :P  [7 5] :L  [8 5] :E})
   (init-game @state)
   (replenish-rack [:A :B :C :F :Q :blank :R :A :A :B] (make-player "Adi"))
   (replenish-rack [:A :B :A :A :B] (make-player "Adi"))
@@ -129,3 +199,4 @@
 
 (defcard-rg rack
   [view/rack (take 7 (shuffle bag))])
+

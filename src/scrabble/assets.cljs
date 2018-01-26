@@ -29,4 +29,5 @@
    :X (slurp-b64 "resources/public/img/X.png")
    :Y (slurp-b64 "resources/public/img/Y.png")
    :Z (slurp-b64 "resources/public/img/Z.png")
+   :blank (slurp-b64 "resources/public/img/blank.png")
    })
